@@ -15,9 +15,10 @@ app.use(cors(
 app.use(express.json({limit: "16kb"}))
 
 // for getting data from URLs
-app.use(express.urlencoded({extended:true , limit: "16kb"}))  // extended is used for working objects inside the object
+app.use(express.urlencoded({extended:true , limit: "16kb"}))  // extended is used for working in objects inside the object
 
 
+// for perfoming CRUD operation on cookie
 app.use(express.static("public"))
 
 app.use(cookieParser())
