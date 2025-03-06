@@ -47,7 +47,6 @@ const videoSchema = new Schema(
             type: Boolean,
             default: true
         },
-
         owner:
         {
             type: Schema.Type.ObjectId,
@@ -61,7 +60,8 @@ const videoSchema = new Schema(
 
 
 
-videoSchema.plugin(mongooseAggregatePaginate)
+videoSchema.plugin(mongooseAggregatePaginate) // this mongoose-aggregate-pagginate-v2 is a package which allow you to write aggregate queries
+//
 
 
 export const Video = mongoose.model('Video', videoSchema)
