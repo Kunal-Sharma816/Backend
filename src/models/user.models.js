@@ -60,11 +60,11 @@ const userSchema = new Schema(
   }
 );
 
-
 // this is logic for saving the password in encypted form
-userSchema.pre("save", async function (next) { // this pre middleware is used to do something just before getting save
+userSchema.pre("save", async function (next) {
+  // this pre middleware is used to do something just before getting save
   if (this.isModified("password")) {
-    this.password = bcrypt.hash(this.password, 10);
+    this.password = await bcrypt.hash(this.password, 10);
     next();
   }
 });

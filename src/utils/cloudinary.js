@@ -19,10 +19,10 @@ const uploadOnCloudnary = async (localFilePath) => {
     console.log("file is upload on cloudinary", response.url);
     return response;
   } catch (error) {
-    fs.unlinkSync(localFilePath) // remove the locally saved tempary file as the upload operation got failed
+    fs.unlinkSync(localFilePath); // remove the locally saved tempary file as the upload operation got failed
     // console.log(error);
-    return null
+    return null;
   }
 };
 
-export {uploadOnCloudnary}
+export { uploadOnCloudnary };

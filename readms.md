@@ -1,3 +1,3 @@
-# This  is the backend series
+# This is the backend series
 
 Backend series with javaScript

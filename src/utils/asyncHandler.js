@@ -1,12 +1,10 @@
 const asyncHandler = (requestHandler) => {
-    return (req, res , next)=>
-    {
-        Promise.resolve(requestHandler(req  , res , next)).catch((err)=>next(err))  
-    }
-}
+  return (req, res, next) => {
+    Promise.resolve(requestHandler(req, res, next)).catch((err) => next(err));
+  };
+};
 
-export {asyncHandler}
-
+export { asyncHandler };
 
 // how i made higher-order-function
 
@@ -14,14 +12,13 @@ export {asyncHandler}
 // const asyncHandler = (func)=> {()=>{}}
 // const asyncHandler = (func)=> async () => {}
 
-
-// method -1 which uses try-catch 
+// method -1 which uses try-catch
 
 // const asyncHandler = (fn) => async(req , res , next) => {
 //     try {
 
 //         await fn(req , res , next)
-        
+
 //     } catch (error) {
 //         res.status(error.code || 500).json({
 //             success: false,
