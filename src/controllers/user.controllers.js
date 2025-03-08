@@ -1,7 +1,7 @@
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import { User } from "../models/user.models.js";
-import { uploadOnCloudnary } from "../utils/cloudinary.js";
+import { uploadOnCloudinary } from "../utils/cloudinary.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 
 export const registerUser = asyncHandler(async (req, res) => {
@@ -48,7 +48,7 @@ export const registerUser = asyncHandler(async (req, res) => {
   }
 
   // step3
-  const existedUser = User.findOne({
+  const existedUser = await User.findOne({
     $or: [{ username }, { email }],
   });
   console.log("Existeduser: ", existedUser);
@@ -59,22 +59,29 @@ export const registerUser = asyncHandler(async (req, res) => {
 
   // step 4
   const avatarLocalPath = req.files?.avatar[0]?.path; // local path for avatar
-  const coverImageLocalPath = req.files?.coverImage[0]?.path; // local path for coverImage
-  console.log("req.body: ", req.body);
-  console.log("req.files: ", req.files);
+  // const coverImageLocalPath = req.files?.coverImage[0]?.path; // local path for coverImage
+  let coverImageLocalPath;
+  if (req.files && Array.isArray(req.files.coverImage) && req.files.coverImage.length > 0) {
+      coverImageLocalPath = req.files.coverImage[0].path
+  }
 
+  console.log("Request from files: ", req.files)
   // check avatar
   if (!avatarLocalPath) {
     throw new ApiError(400, "Avatar file is required");
   }
 
+ 
   // step 5 - upload on cloudnary
-  const avatar = await uploadOnCloudnary(avatarLocalPath);
-  const coverImage = await uploadOnCloudnary(coverImageLocalPath);
+  const avatar = await uploadOnCloudinary(avatarLocalPath)
+  const coverImage = await uploadOnCloudinary(coverImageLocalPath)
+  console.log("Request from body: ",req.body)
+  
+
 
   // check avatar uploaded successfully
   if (!avatar) {
-    throw new ApiError(400, "Avatar file is required");
+    throw new ApiError(400, "Avatar file is required,please check");
   }
 
   // step 6
@@ -103,3 +110,5 @@ export const registerUser = asyncHandler(async (req, res) => {
     new ApiResponse(200 , createdUser , "User created successfully")
   )
 });
+
+

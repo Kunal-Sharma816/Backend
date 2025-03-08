@@ -9,7 +9,7 @@ cloudinary.config({
 });
 
 // Upload an image
-const uploadOnCloudnary = async (localFilePath) => {
+const uploadOnCloudinary = async (localFilePath) => {
   try {
     if (!localFilePath) return null;
     const response = await cloudinary.uploader.upload(localFilePath, {
@@ -17,6 +17,7 @@ const uploadOnCloudnary = async (localFilePath) => {
     });
     // file uploded successfully
     console.log("file is upload on cloudinary", response.url);
+    fs.unlinkSync(localFilePath)
     return response;
   } catch (error) {
     fs.unlinkSync(localFilePath); // remove the locally saved tempary file as the upload operation got failed
@@ -25,4 +26,4 @@ const uploadOnCloudnary = async (localFilePath) => {
   }
 };
 
-export { uploadOnCloudnary };
+export { uploadOnCloudinary };
