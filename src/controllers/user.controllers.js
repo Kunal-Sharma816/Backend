@@ -3,21 +3,22 @@ import { ApiError } from "../utils/ApiError.js";
 import { User } from "../models/user.models.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
+import {jwt} from 'jsonwebtoken'
 
 // method for generating access and referesh tokens
 
-const generateAccessAndRefereshTokens = async(userId)=>
+const generateAccessAndRefreshTokens = async(userId)=>
 {
   try {
     const user =  await User.findById(userId)
     const accessToken = user.generateAccessToken()
-    const refereshToken = user.generateRefreshToken()
+    const refreshToken = user.generateRefreshToken()
 
 
-    user.refereshToken  = refereshToken
+    user.refreshToken  = refreshToken
     await user.save({validateBeforeSave: false })
 
-    return {accessToken ,refereshToken}
+    return {accessToken ,refreshToken}
 
   } catch (error) {
     throw new ApiError(
@@ -165,7 +166,7 @@ const loginUser = asyncHandler(async (req, res) => {
     throw new ApiError(401, "Invalid user credentials");
   }
 
-  const {accessToken ,refereshToken}  = await generateAccessAndRefereshTokens(user._id)
+  const {accessToken ,refreshToken}  = await generateAccessAndRefreshTokens(user._id)
 
 
   const loggedInUser = await User.findById(user._id).select("-password -refreshToken")
@@ -178,12 +179,12 @@ const loginUser = asyncHandler(async (req, res) => {
   return res
   .status(200)
   .cookie("accessToken", accessToken , options)
-  .cookie("refereshToken",refereshToken , options)
+  .cookie("refreshToken",refreshToken , options)
   .json(
     new ApiResponse(
       200,
       {
-        user: loggedInUser , refereshToken , accessToken
+        user: loggedInUser , refreshToken , accessToken
       },
       "User logged in successfully"
     )
@@ -197,7 +198,7 @@ const logoutUser = asyncHandler(async(req , res)=>
     req.user._id,
     {
       $set: {
-        refereshToken: undefined
+        refreshToken: undefined
       }
     },
     {
@@ -218,5 +219,58 @@ const logoutUser = asyncHandler(async(req , res)=>
 })
 
 
+const refreshAccessToken = asyncHandler(async(req , res)=>
+{
+  const incomingRefreshToken = req.cookie.refreshToken || req.body.refreshToken
+  if(!incomingRefreshToken)
+  {
+    throw new ApiError(401 , "unauthorized request")
+  }
 
-export { registerUser, loginUser , logoutUser };
+  try {
+    const decodedToken = jwt.verify(
+      incomingRefreshToken,
+      process.env.REFRESH_TOKEN_SECRET
+    )
+  
+    console.log(decodedToken)
+  
+    const user = await User.findById(decodedToken?._id)
+  
+    if(!user)
+    {
+      throw new ApiError(401 , "Invalid Referesh token")
+    }
+  
+    if(incomingRefreshToken !== user?.refreshToken)
+    {
+      throw new ApiError(401 , "Referesh token is expired or used")
+    }
+  
+    const options = {
+      httpOnly: true,
+      secure: true
+    }
+  
+    const {accessToken , newrefreshToken} = await generateAccessAndRefreshTokens(user._id)
+  
+    return res
+    .status(200)
+    .cookie("accessToken" , accessToken , options)
+    .cookie("refershToken" , newrefreshToken , options)
+    .json(
+      new ApiResponse(
+        200 ,
+        {
+          accessToken , refreshToken: newrefreshToken
+        }
+      )
+    )
+  } catch (error) {
+    throw new ApiError(401 , error?.message || "Invalid refersh token")
+  }
+
+})
+
+
+export { registerUser, loginUser , logoutUser , refreshAccessToken};
